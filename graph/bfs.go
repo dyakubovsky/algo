@@ -22,29 +22,73 @@ import (
 
 func bfs(n int32, m int32, edges [][]int32, s int32) []int32 {
 	var nodeQueue []int32
-	visitednode:=make(map[int32]bool)
-    var numend int32
+	var distances []int32
+	visitednode := make(map[int32]bool)
+	level := make(map[int32]int32)
+	var numend, sx, nx, lv int32
+	var flag bool
+	lv=1
 	currentNode := s
-	nodeQueue = append(nodeQueue,currentNode)   // Добавляем первый элемент в очередь
-	
+	nodeQueue = append(nodeQueue, currentNode) // Добавляем первый элемент в очередь
+	level[currentNode] = 0 // пишем левел базовой ноды 
+	for ix := 0; ix < len(nodeQueue); ix++ { //пока не пробежимся по всей очереди
+		currentNode = nodeQueue[ix]
+		visitednode[currentNode] = true      //отметили что посетил
+		if level[currentNode]==lv {lv=lv+1}  //перещелкиваем
+		for i := 0; i < len(edges); i++ { // запускаем цикл по всему слайсу для поиска ребер
+			for _, num := range edges[i][:1] { // ищем вершину родитель
+				if edges[i] != nil && num == currentNode { // берем в слайсе ребра только относящиеся к родителю
+					// началась работа с уровнем
+					for _, numend = range edges[i][1:] { //ищем потомкоd и добавляем в конец очереди
+						
+						for _, sx = range nodeQueue {
+							if sx == numend {
+								flag = true
+							}
+						} // есть ли у нас уже потомок в очереди то пропускаем
 
-	for it, currentNode := range nodeQueue { //пока не пробежимся по всей очереди
-		fmt.Println("iter :", it)
-		     visitednode[currentNode]=true //отметили что посетили
-    for i:=0; i<=len(edges)-1; i++ { // запускаем цикл по всему слайсу для поиска ребер
-	for _, num := range edges[i][:1] { // ищем вершину родитель
-		if edges[i] != nil && num == currentNode {  // берем в слайсе ребра только относящиеся к родителю
-			for _, numend = range edges[i][1:] {     //ищем потомкоd и добавляем в конец очереди		 
-				if visitednode[numend] == false{	// сначала проверяем не посещали ли вершину ранее 	
-					nodeQueue=append(nodeQueue,numend)
-				 }
+						if visitednode[numend] == false && flag == false { // сначала проверяем не посещали ли вершину ранее
+							nodeQueue = append(nodeQueue, numend)
+						    distances = append(distances, int32(lv)*6)
+							level[numend]=lv
+							
+							
+						}
+						flag = false //возвращаем флаг множества ребер
+						
+					}
+					
+				}
 			}
 		}
 	}
-  }  
-}
-fmt.Println("nodeQueue :", nodeQueue)
- return nodeQueue
+	//  Проверяем висящие узлы
+
+	if len(nodeQueue) != int(n) {
+		for ix := 1; ix <= int(n); ix++ {
+			flag = false
+			for _, nx = range nodeQueue {
+				if ix == int(nx) {
+					flag = true
+				}
+			}
+			if flag == false { //нашли
+				if ix > int(s) {
+					nodeQueue = append(nodeQueue, int32(ix))
+					distances = append(distances, -1)
+				}
+				if ix < int(s) {
+					nodeQueue = append([]int32{int32(ix)}, nodeQueue...)
+					distances = append([]int32{-1}, distances...)
+				}
+
+			}
+		}
+	}
+
+	fmt.Println("nodeQueue :", nodeQueue, "nodeQueue len :", len(nodeQueue))
+	fmt.Println("distances :", distances)
+	return nodeQueue
 }
 
 func main() {
